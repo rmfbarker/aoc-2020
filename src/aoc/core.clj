@@ -50,15 +50,16 @@
 
                   (read-input "input-day2"))))
 
-
-(map
-  (fn [pwd-policy]
-    (let [[count [character _] password] (str/split pwd-policy #" ")]
-      [count character password]))
-  (read-input "input-day2"))
-
+(def answer-2 (count
+                (filter
+                  (fn [pwd-policy]
+                    (let [[character-policy [character _] password] (str/split pwd-policy #" ")
+                          [char-1 char-2] (map #(get password (dec (Integer/parseInt %)))
+                                               (str/split character-policy #"-"))
+                          valid (= 1 (count (filter identity [(= character char-1) (= character char-2)])))]
+                      valid))
+                  (read-input "input-day2"))))
 
 (defn -main
-  "I don't do a whole lot ... yet."
   [& args]
-  (println "Hello, World!"))
+  (println "Advent of Code 2020"))
