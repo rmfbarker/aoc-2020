@@ -89,6 +89,19 @@
 (def answer-3
   (count-trees (read-input "input-day3") [3 1]))
 
+(def angles [{:Right 1, :down 1}
+             {:Right 3, :down 1}
+             {:Right 5, :down 1}
+             {:Right 7, :down 1}
+             {:Right 1, :down 2}])
+
+(def answer-3-b
+  (reduce *
+          (let [grid (read-input "input-day3")]
+            (map (fn [{:keys [Right down]}]
+                   (count-trees grid [Right down]))
+                 angles))))
+
 (defn -main
   [& args]
   (println "Advent of Code 2020"))
