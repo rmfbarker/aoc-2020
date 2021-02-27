@@ -26,7 +26,8 @@
 
 (defn read-input [filename]
   (clojure.string/split-lines
-    (slurp (io/resource filename))))
+    (slurp
+      (io/resource filename))))
 
 (def input-day1 (map #(Integer/parseInt %)
                      (read-input "input-day1")))
@@ -59,6 +60,34 @@
                           valid (= 1 (count (filter identity [(= character char-1) (= character char-2)])))]
                       valid))
                   (read-input "input-day2"))))
+
+;; Day 3
+
+(def day3-basic-example (str/split-lines "..##.......\n#...#...#..\n.#....#..#.\n..#.#...#.#\n.#...##..#.\n..#.##.....\n.#.#.#....#\n.#........#\n#.##...#...\n#...##....#\n.#..#...#.#"))
+
+(defn get-at [grid [x y]]
+  (if-let [row (get grid y)]
+    (let [x-in (mod x (count row))]
+      (get row x-in))))
+
+(defn get-steps [step-right step-down]
+  (let [start-pos [0 0]]
+    (iterate
+      (fn [[x y]]
+        [(+ x step-right) (+ y step-down)])
+      start-pos)))
+
+(defn count-trees [grid angle]
+  (let [[step-right step-down] angle]
+    (count
+      (filter
+        #(= \# %)
+        (take-while identity
+                    (map (partial get-at grid)
+                         (get-steps step-right step-down)))))))
+
+(def answer-3
+  (count-trees (read-input "input-day3") [3 1]))
 
 (defn -main
   [& args]
