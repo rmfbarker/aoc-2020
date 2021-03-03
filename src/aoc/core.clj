@@ -102,6 +102,29 @@
                    (count-trees grid [Right down]))
                  angles))))
 
+
+(defn parse-passport [passport]
+  (into
+    {}
+    (map
+      #(clojure.string/split % #":")
+      (clojure.string/split passport #"[ \t\n]+"))))
+
+(defn valid-passport? [passport]
+  (let [required-fields ["byr" "iyr" "eyr" "hgt" "hcl" "ecl" "pid"]
+        passport-fields (set (keys (parse-passport passport)))]
+    (every? passport-fields required-fields)))
+
+(defn parse-passports [batch-file]
+  (clojure.string/split batch-file #"\n\n"))
+
+(defn count-valid-passports [batch-file-str]
+  (let [passports (clojure.string/split batch-file-str #"\n\n")]
+    (doseq [p passports]
+      (println (parse-passport p))
+      (println p  (valid-passport? p)))
+    (count (filter valid-passport? passports))))
+
 (defn -main
   [& args]
   (println "Advent of Code 2020"))
