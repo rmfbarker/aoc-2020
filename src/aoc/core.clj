@@ -108,21 +108,89 @@
     {}
     (map
       #(clojure.string/split % #":")
-      (clojure.string/split passport #"[ \t\n]+"))))
-
-(defn valid-passport? [passport]
-  (let [required-fields ["byr" "iyr" "eyr" "hgt" "hcl" "ecl" "pid"]
-        passport-fields (set (keys (parse-passport passport)))]
-    (every? passport-fields required-fields)))
+      (clojure.string/split (clojure.string/trim passport) #"[ \t\n]+"))))
 
 (defn parse-passports [batch-file]
   (clojure.string/split batch-file #"\n\n"))
 
+(let [passport   "pid:087499704 hgt:74in ecl:grn iyr:2012 eyr:2030 byr:1980\nhcl:#623a2f"
+      birth-year (get (parse-passport passport) "byr")]
+  (when birth-year
+    (and (re-find #"\d{4}" birth-year)
+         (<= 1920 (Integer/parseInt birth-year) 2002))))
+
+(defn valid-yr [attr lwr uppr]
+  (when attr
+    (and (re-find #"\d{4}" attr)
+         (<= lwr (Integer/parseInt attr) uppr))))
+
+
+;byr (Birth Year) - four digits; at least 1920 and at most 2002.
+;iyr (Issue Year) - four digits; at least 2010 and at most 2020.
+;eyr (Expiration Year) - four digits; at least 2020 and at most 2030.
+;hgt (Height) - a number followed by either cm or in:
+;If cm, the number must be at least 150 and at most 193.
+;If in, the number must be at least 59 and at most 76.
+;hcl (Hair Color) - a # followed by exactly six characters 0-9 or a-f.
+;ecl (Eye Color) - exactly one of: amb blu brn gry grn hzl oth.
+;pid (Passport ID) - a nine-digit number, including leading zeroes.
+;cid (Country ID) - ignored, missing or not.
+
+(defn valid-byr [passport]
+  (let [birth-year (get passport "byr")]
+    (valid-yr birth-year 1920 2002)))
+
+(defn valid-iyr [passport]
+  (let [year (get passport "iyr")]
+    (valid-yr year 2010 2020)))
+
+(defn valid-eyr [passport]
+  (let [year (get passport "eyr")]
+    (valid-yr year 2020 2030)))
+
+(defn parse-int [s]
+  (try (Integer/parseInt s)
+       (catch NumberFormatException e)))
+
+(defn valid-hgt [passport]
+  (let [hgt  (get passport "hgt")
+        unit (re-find #"cm$|in$" hgt)
+        size (parse-int (re-find #"\d+" hgt))]
+    (and
+      (some? (re-find #"\d+in$|\d+cm$" hgt))
+      (if (= "cm" unit)
+        (<= 150 size 193)
+        (<= 59 size 76)))))
+
+(defn valid-hcl [passport]
+  (let [hcl (get passport "hcl")]
+    (and hcl
+         (some? (re-find #"#[0-9a-f]{6}" hcl)))))
+
+(defn valid-ecl [passport]
+  (let [ecl (get passport "ecl")]
+    (contains? #{"amb" "blu" "brn" "gry" "grn" "hzl" "oth"} ecl)))
+
+(defn valid-pid [passport]
+  (let [pid (get passport "pid")]
+    (and pid (some? (re-find #"^\d{9}$" pid)))))
+
+(defn valid-passport? [passport-str]
+  (let [required-fields ["byr" "iyr" "eyr" "hgt" "hcl" "ecl" "pid"]
+        passport        (parse-passport passport-str)
+        passport-fields (set (keys passport))]
+    (and
+      (every? passport-fields required-fields)
+      (valid-byr passport)
+      (valid-iyr passport)
+      (valid-eyr passport)
+      (valid-hgt passport)
+      (valid-hcl passport)
+      (valid-ecl passport)
+      (valid-pid passport))))
+
 (defn count-valid-passports [batch-file-str]
   (let [passports (clojure.string/split batch-file-str #"\n\n")]
-    (doseq [p passports]
-      (println (parse-passport p))
-      (println p  (valid-passport? p)))
     (count (filter valid-passport? passports))))
 
 (defn -main
