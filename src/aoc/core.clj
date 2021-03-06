@@ -193,6 +193,29 @@
   (let [passports (clojure.string/split batch-file-str #"\n\n")]
     (count (filter valid-passport? passports))))
 
+
+;; Day 5
+
+(defn bsp-to-binary [bsp]
+  (apply str
+         (map (fn [c] (if (or (= \F c)
+                              (= \L c))
+                        0 1))
+              bsp)))
+
+(defn bsp-to-seat-id [bsp]
+  (Integer/parseInt
+    (bsp-to-binary bsp) 2))
+
+(defn your-seat []
+  (first
+    (drop-while
+      (fn [[x y]] (= (inc x) y))
+      (partition-all 2 1
+                     (sort
+                       (map bsp-to-seat-id
+                            (read-input "input-day5")))))))
+
 (defn -main
   [& args]
   (println "Advent of Code 2020"))
