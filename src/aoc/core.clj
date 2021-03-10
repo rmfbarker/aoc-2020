@@ -216,6 +216,28 @@
                        (map bsp-to-seat-id
                             (read-input "input-day5")))))))
 
+;; Day 6
+
+(defn count-group [g]
+  (count (set (apply str (clojure.string/split g #"\s+")))))
+
+(def answer-6a
+  (let [groups (clojure.string/split (slurp (io/resource "input-day6")) #"\n\n")]
+    (reduce + (map count-group groups))))
+
+(def groups (clojure.string/split (slurp (io/resource "input-day6")) #"\n\n"))
+
+(def answer-6b
+  (reduce +
+          (map (fn [group]
+                 (let [ppl-count (count (clojure.string/split-lines group))]
+                   (count (filter #(= ppl-count %)
+                                  (map count
+                                       (vals
+                                         (group-by identity
+                                                   (remove #(= \newline %) group))))))))
+               groups)))
+
 (defn -main
   [& args]
   (println "Advent of Code 2020"))
