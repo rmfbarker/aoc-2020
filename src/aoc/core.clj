@@ -238,6 +238,32 @@
                                                    (remove #(= \newline %) group))))))))
                groups)))
 
+
+;; Day 7
+(defn parse-contents [bag-line]
+  (->>
+    bag-line
+    (re-seq #"(\d) ([a-z]+ [a-z]+) bags?")
+    (map (fn [[_ n colour]] [colour n]))
+    (into {})))
+
+(defn parse-outer [bag-line]
+  (second (re-find #"^([a-z]+ [a-z]+) bags" bag-line)))
+
+(def bags (into {}
+                (map (fn [l]
+                       [(parse-outer l) (parse-contents l)])
+                     (read-input "input-day7"))))
+
+(defn contains-shiny-gold-bags [bag]
+  (let [inner-bags (keys (get bags bag))]
+    (or
+     (contains? (set inner-bags) "shiny gold")
+     (some identity (map contains-shiny-gold-bags inner-bags)))))
+
+(defn possible-outer-bags []
+  (count (filter identity (map contains-shiny-gold-bags (keys bags)))))
+
 (defn -main
   [& args]
   (println "Advent of Code 2020"))

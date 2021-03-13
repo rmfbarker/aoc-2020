@@ -147,3 +147,6 @@
 
     ;iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719
     (is (true? (valid-passport? "iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719")))))
+
+(deftest day-7
+  (is (= 238 (possible-outer-bags))))
