@@ -244,16 +244,19 @@
   (->>
     bag-line
     (re-seq #"(\d) ([a-z]+ [a-z]+) bags?")
-    (map (fn [[_ n colour]] [colour n]))
+    (map (fn [[_ n colour]] [colour (Integer/parseInt n)]))
     (into {})))
 
 (defn parse-outer [bag-line]
   (second (re-find #"^([a-z]+ [a-z]+) bags" bag-line)))
 
-(def bags (into {}
-                (map (fn [l]
-                       [(parse-outer l) (parse-contents l)])
-                     (read-input "input-day7"))))
+(defn parse-bags [bag-lines]
+  (into {}
+        (map (fn [l]
+               [(parse-outer l) (parse-contents l)])
+             bag-lines)))
+
+(def bags (parse-bags (read-input "input-day7")))
 
 (defn contains-shiny-gold-bags [bag]
   (let [inner-bags (keys (get bags bag))]
@@ -263,6 +266,20 @@
 
 (defn possible-outer-bags []
   (count (filter identity (map contains-shiny-gold-bags (keys bags)))))
+
+(defn get-bag-count [bags type]
+  (let [contents (get bags type)]
+    (reduce
+      (fn [total [type count]]
+        (+ total count (* count (get-bag-count bags type))))
+      0
+      contents)))
+
+(comment
+
+  (get-bag-count bags "shiny gold") ;;=> 82930
+  )
+
 
 (defn -main
   [& args]

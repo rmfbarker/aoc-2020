@@ -1,7 +1,8 @@
 (ns aoc.core-test
   (:require [clojure.test :refer :all]
             [aoc.core :refer :all]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.string :as str]))
 
 (deftest day-1
   (testing "basic example"
@@ -149,4 +150,12 @@
     (is (true? (valid-passport? "iyr:2010 hgt:158cm hcl:#b6652a ecl:blu byr:1944 eyr:2021 pid:093154719")))))
 
 (deftest day-7
-  (is (= 238 (possible-outer-bags))))
+  (is (= 238 (possible-outer-bags)))
+
+  (let [example-bags
+                   (parse-bags
+                     (str/split-lines "shiny gold bags contain 2 dark red bags.\ndark red bags contain 2 dark orange bags.\ndark orange bags contain 2 dark yellow bags.\ndark yellow bags contain 2 dark green bags.\ndark green bags contain 2 dark blue bags.\ndark blue bags contain 2 dark violet bags.\ndark violet bags contain no other bags."))
+
+        day-7-bags (parse-bags (read-input "input-day7"))]
+    (is (= 126 (get-bag-count example-bags "shiny gold")))
+    (is (= 82930 (get-bag-count day-7-bags "shiny gold")))))
