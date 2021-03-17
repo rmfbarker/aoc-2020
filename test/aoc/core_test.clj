@@ -159,3 +159,13 @@
         day-7-bags (parse-bags (read-input "input-day7"))]
     (is (= 126 (get-bag-count example-bags "shiny gold")))
     (is (= 82930 (get-bag-count day-7-bags "shiny gold")))))
+
+(deftest day-8
+  (let [instructions (str/split-lines "nop +0\nacc +1\njmp +4\nacc +3\njmp -3\nacc -99\nacc +1\njmp -4\nacc +6")]
+    (is (= 5 (accumulate instructions))))
+
+  (let [instructions (read-input "input-day8")]
+    (is (= 1489 (accumulate instructions))))
+
+
+  )

@@ -277,10 +277,33 @@
 
 (comment
 
-  (get-bag-count bags "shiny gold") ;;=> 82930
+  (get-bag-count bags "shiny gold")                         ;;=> 82930
   )
 
 
-(defn -main
-  [& args]
-  (println "Advent of Code 2020"))
+;; Day 8
+
+(defn parse-instruction [instructions pointer]
+  (let [cmd      (get instructions pointer)
+        [operation argument] (str/split cmd #" ")
+        argument (Integer/parseInt argument)]
+    [operation argument]))
+
+(defn accumulate [instructions]
+
+  (loop [pointer              0
+         accumulator          0
+         visited-instructions #{}]
+
+    (if (contains? visited-instructions pointer)
+      accumulator
+      (let [[operation argument] (parse-instruction instructions pointer)]
+
+        (let [[next-pointer accumulator] (condp = operation
+                                           "acc" [(inc pointer) (+ accumulator argument)]
+                                           "jmp" [(+ pointer argument) accumulator]
+                                           "nop" [(inc pointer) accumulator])]
+
+          (recur next-pointer
+                 accumulator
+                 (conj visited-instructions pointer)))))))
