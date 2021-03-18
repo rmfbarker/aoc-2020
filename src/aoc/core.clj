@@ -283,11 +283,19 @@
 
 ;; Day 8
 
-(defn parse-instruction [instructions pointer]
-  (let [cmd      (get instructions pointer)
-        [operation argument] (str/split cmd #" ")
+(defn parse-instruction [cmd]
+  (let [[operation argument] (str/split cmd #" ")
         argument (Integer/parseInt argument)]
     [operation argument]))
+
+;; jmp (to nop) or nop (to jmp)
+(defn swap-instruction [instructions pointer]
+  (let [cmd (get instructions pointer)
+        [operation argument] cmd]
+    (cond
+      (= operation "jmp") ["nop" argument]
+      (= operation "nop") ["jmp" argument]
+      :else [operation argument])))
 
 (defn accumulate [instructions]
 
@@ -295,15 +303,29 @@
          accumulator          0
          visited-instructions #{}]
 
-    (if (contains? visited-instructions pointer)
-      accumulator
-      (let [[operation argument] (parse-instruction instructions pointer)]
+    (cond
 
-        (let [[next-pointer accumulator] (condp = operation
-                                           "acc" [(inc pointer) (+ accumulator argument)]
-                                           "jmp" [(+ pointer argument) accumulator]
-                                           "nop" [(inc pointer) accumulator])]
+      (= (dec (count instructions)) pointer) [true accumulator]
 
-          (recur next-pointer
-                 accumulator
-                 (conj visited-instructions pointer)))))))
+      (contains? visited-instructions pointer) [false accumulator]
+
+      :else (let [[operation argument] (get instructions pointer)]
+              (let [[next-pointer accumulator] (condp = operation
+                                                 "acc" [(inc pointer) (+ accumulator argument)]
+                                                 "jmp" [(+ pointer argument) accumulator]
+                                                 "nop" [(inc pointer) accumulator])]
+
+                (recur next-pointer
+                       accumulator
+                       (conj visited-instructions pointer)))))))
+
+(defn fix-program []
+  (let [cmds (mapv parse-instruction (read-input "input-day8"))]
+    (first
+      (filter
+        identity
+        (for [i (range (count cmds))
+              :let [new-cmd      (swap-instruction cmds i)
+                    instructions (assoc cmds i new-cmd)
+                    [success accumulator] (accumulate instructions)]]
+          (when success accumulator))))))

@@ -161,11 +161,10 @@
     (is (= 82930 (get-bag-count day-7-bags "shiny gold")))))
 
 (deftest day-8
-  (let [instructions (str/split-lines "nop +0\nacc +1\njmp +4\nacc +3\njmp -3\nacc -99\nacc +1\njmp -4\nacc +6")]
-    (is (= 5 (accumulate instructions))))
+  (let [instructions (mapv parse-instruction (str/split-lines "nop +0\nacc +1\njmp +4\nacc +3\njmp -3\nacc -99\nacc +1\njmp -4\nacc +6"))]
+    (is (= 5 (second (accumulate instructions)))))
 
-  (let [instructions (read-input "input-day8")]
-    (is (= 1489 (accumulate instructions))))
+  (let [instructions (mapv parse-instruction (read-input "input-day8"))]
+    (is (= 1489 (second (accumulate instructions)))))
 
-
-  )
+  (is (= 1539 (fix-program))))
