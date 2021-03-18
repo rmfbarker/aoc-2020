@@ -329,3 +329,40 @@
                     instructions (assoc cmds i new-cmd)
                     [success accumulator] (accumulate instructions)]]
           (when success accumulator))))))
+
+
+;; Day 9
+
+(def puzzle-input [35
+                   20
+                   15
+                   25
+                   47
+                   40
+                   62
+                   55
+                   65
+                   95
+                   102
+                   117
+                   150
+                   182
+                   127
+                   219
+                   299
+                   277
+                   309
+                   576])
+
+(def xmas (partition 5 1 puzzle-input))
+
+(defn all-sums [ns]
+  (for [x (range (count ns))
+        y (range (inc x) (count ns))]
+    (+ (nth ns x) (nth ns y))))
+
+(defn is-valid []
+  (map
+   (fn [[n ns]]
+     [(contains? (set (all-sums ns)) n) n])
+   (map #(vector %1 %2) (drop 5 puzzle-input) xmas)))
