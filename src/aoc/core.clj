@@ -361,8 +361,11 @@
         y (range (inc x) (count ns))]
     (+ (nth ns x) (nth ns y))))
 
-(defn is-valid []
+(defn is-valid [preamble-n]
   (map
    (fn [[n ns]]
      [(contains? (set (all-sums ns)) n) n])
-   (map #(vector %1 %2) (drop 5 puzzle-input) xmas)))
+   (map #(vector %1 %2) (drop preamble-n puzzle-input) xmas)))
+
+(def day9-part1
+  (first (filter #(false? (first %)) (is-valid 25))))

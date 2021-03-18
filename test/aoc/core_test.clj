@@ -168,3 +168,4 @@
     (is (= 1489 (second (accumulate instructions)))))
 
   (is (= 1539 (fix-program))))
+
