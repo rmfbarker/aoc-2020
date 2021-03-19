@@ -361,11 +361,38 @@
         y (range (inc x) (count ns))]
     (+ (nth ns x) (nth ns y))))
 
-(defn is-valid [preamble-n]
-  (map
-   (fn [[n ns]]
-     [(contains? (set (all-sums ns)) n) n])
-   (map #(vector %1 %2) (drop preamble-n puzzle-input) xmas)))
+(defn is-valid [preamble-n puzzle-input]
+  (let [xmas (partition preamble-n 1 puzzle-input)]
+    (map
+      (fn [n ns]
+        (when-not (contains? (set (all-sums ns)) n)
+          n))
+      (drop preamble-n puzzle-input)
+      xmas)))
 
 (def day9-part1
-  (first (filter #(false? (first %)) (is-valid 25))))
+  (let [puzzle-input (map #(Long/parseLong %) (read-input "input-day9"))]
+    (first (filter identity (is-valid 25 puzzle-input)))))
+
+(defn day9-part2 [n-stream target]
+
+  (let [l                (count n-stream)
+        partition-bounds (for [x (range l)
+                               y (range (inc x) l)]
+                           [x y])
+        [_ lwr uppr] (first
+                       (filter
+                         #(= target (first %))
+                         (map
+                           (fn [[lwr uppr]]
+                             [(reduce + (subvec n-stream lwr uppr)) lwr uppr])
+                           partition-bounds)))
+        contiguous-ns    (subvec n-stream lwr uppr)]
+    (+ (apply min contiguous-ns)
+       (apply max contiguous-ns))))
+
+(day9-part2 [35 20 15 25 47 40 62 55 65 95 102 117 150 182 127 219 299 277 309 576]
+            127) ;;=> 62
+
+(day9-part2 (mapv #(Long/parseLong %) (read-input "input-day9"))
+            1930745883) ;;=> 268878261
