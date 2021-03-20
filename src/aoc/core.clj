@@ -401,16 +401,13 @@
 ;; Day 10
 
 (defn joltage-steps [input]
-  (let [
-        device-rating (+ 3 (apply max input))
+  (let [device-rating (+ 3 (apply max input))
         joltages      (sort (conj input device-rating 0))]
-    (println joltages)
-    (reduce-kv
-      (fn [acc k v]
-        (conj acc [k (count v)]))
-      []
+    (map
+      (fn [[k v]]
+        [k (count v)])
       (group-by identity
-                (map #(apply - (reverse %))
+                (map (fn [[low high]] (- high low))
                      (partition 2 1 joltages))))))
 
 ;; Examples
@@ -421,4 +418,4 @@
 (def day10-part1
   (let [input (map #(Integer/parseInt %) (read-input "input-day10"))
         steps (joltage-steps input)]
-    (apply * (map second steps)))) ;;=> 1920
+    (reduce * (map second steps)))) ;;=> 1920
