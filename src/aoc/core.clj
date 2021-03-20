@@ -1,7 +1,7 @@
 (ns aoc.core
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [clojure.math.combinatorics :as combo])
+            )
   (:gen-class))
 
 (defn calc-day-1 [input]
@@ -423,17 +423,20 @@
 
 ;; => Part 2
 
-(defn possible-adapter-combos [adapters]
-  (let [max-adapter      (apply max adapters)
-        built-in-adapter (+ 3 max-adapter)
-        adapter-combos   (combo/subsets adapters)]
-    (count
-      (filter
-        (fn [combo]
-          (every? (fn [[l h]]
-                    (<= (- h l) 3))
-                  (partition 2 1 (sort (conj combo 0 built-in-adapter)))))
-        adapter-combos))))
+(defn day10-part2 []
+  (let [joltages    (vec (sort (map #(Integer/parseInt %) (read-input "input-day10"))))
+        max-joltage (apply max joltages)
+        built-in    (+ 3 max-joltage)
+        joltages    (conj joltages built-in)
+        paths-to    (reduce
+                      (fn [paths j]
+                        (println j)
+                        (let [valid-adapters (map #(- j %) [1 2 3])
+                              ways-here      (reduce + (map #(get paths % 0) valid-adapters))]
+                          (assoc paths j ways-here)))
+                      {0 1}
+                      joltages)]
+    (get paths-to built-in))) ;=> 1511207993344
 
-(possible-adapter-combos [16 10 15 5 1 11 7 19 6 12 4])     ;=> 8
-(possible-adapter-combos [28 33 18 42 31 14 46 20 48 47 24 23 49 45 19 38 39 11 1 32 25 35 8 17 7 9 4 2 34 10 3]) ;=> ??
+;(possible-adapter-combos [16 10 15 5 1 11 7 19 6 12 4])     ;=> 8
+;(possible-adapter-combos [28 33 18 42 31 14 46 20 48 47 24 23 49 45 19 38 39 11 1 32 25 35 8 17 7 9 4 2 34 10 3]) ;=> ??
