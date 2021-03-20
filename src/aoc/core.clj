@@ -392,7 +392,33 @@
        (apply max contiguous-ns))))
 
 (day9-part2 [35 20 15 25 47 40 62 55 65 95 102 117 150 182 127 219 299 277 309 576]
-            127) ;;=> 62
+            127)                                            ;;=> 62
 
 (day9-part2 (mapv #(Long/parseLong %) (read-input "input-day9"))
-            1930745883) ;;=> 268878261
+            1930745883)                                     ;;=> 268878261
+
+
+;; Day 10
+
+(defn joltage-steps [input]
+  (let [
+        device-rating (+ 3 (apply max input))
+        joltages      (sort (conj input device-rating 0))]
+    (println joltages)
+    (reduce-kv
+      (fn [acc k v]
+        (conj acc [k (count v)]))
+      []
+      (group-by identity
+                (map #(apply - (reverse %))
+                     (partition 2 1 joltages))))))
+
+;; Examples
+
+(joltage-steps [16 10 15 5 1 11 7 19 6 12 4])               ;;=> [[1 7] [3 5]]
+(joltage-steps [28 33 18 42 31 14 46 20 48 47 24 23 49 45 19 38 39 11 1 32 25 35 8 17 7 9 4 2 34 10 3])
+
+(def day10-part1
+  (let [input (map #(Integer/parseInt %) (read-input "input-day10"))
+        steps (joltage-steps input)]
+    (apply * (map second steps)))) ;;=> 1920
