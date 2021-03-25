@@ -438,6 +438,39 @@
     (get paths-to built-in)))
 
 (defn day10-part2 []
-  (let [joltages    (map #(Integer/parseInt %) (read-input "input-day10"))]
-    (valid-combinations joltages))) ;=> 1511207993344
+  (let [joltages (map #(Integer/parseInt %) (read-input "input-day10"))]
+    (valid-combinations joltages)))                         ;=> 1511207993344
 
+; Day 11
+
+(def plan (str/split-lines "L.LL.LL.LL\nLLLLLLL.LL\nL.L.L..L..\nLLLL.LL.LL\nL.LL.LL.LL\nL.LLLLL.LL\n..L.L.....\nLLLLLLLLLL\nL.LLLLLL.L\nL.LLLLL.LL"))
+
+(defn neighbours [[x y]]
+  (for [dx [-1 0 1] dy (if (zero? dx) [-1 1] [-1 0 1])]
+    [(+ dx x) (+ dy y)]))
+
+(defn step-cell [cell plan]
+  (let [seat-status (get-in plan cell)
+        adj         (frequencies (map #(get-in plan %)
+                                      (neighbours cell)))]
+    (cond (and (= \L seat-status)
+               (= 0 (get adj \# 0))) \#
+
+          (and (= \# seat-status)
+               (<= 4 (get adj \# 0))) \L
+
+          :else seat-status)))
+
+(defn step-plan [plan]
+  (let [row-l (count (first plan))]
+    (mapv str/join
+          (partition row-l
+                     (str/join (for [row (range (count plan))
+                                     col (range row-l)]
+                                 (step-cell [row col] plan)))))))
+
+(defn stable-plan [plan]
+  (first (first (drop-while #(apply not= %) (partition 2 1 (iterate step-plan plan))))))
+
+(defn seat-count [plan]
+  (get (frequencies (str/join (stable-plan plan))) \#))

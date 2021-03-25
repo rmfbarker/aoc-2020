@@ -177,7 +177,8 @@
          (valid-combinations [28 33 18 42 31 14 46 20 48 47 24 23 49 45 19 38 39 11 1 32 25 35 8 17 7 9 4 2 34 10 3])))
 
   (is (= 1511207993344
-         (valid-combinations (map #(Integer/parseInt %) (read-input "input-day10")))))
+         (valid-combinations (map #(Integer/parseInt %) (read-input "input-day10"))))))
 
-  )
-
+(deftest day11
+  (is (= (seat-count (stable-plan (read-input "input-day11")))
+         2321)))
