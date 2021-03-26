@@ -180,5 +180,14 @@
          (valid-combinations (map #(Integer/parseInt %) (read-input "input-day10"))))))
 
 (deftest day11
-  (is (= (seat-count (stable-plan (read-input "input-day11")))
-         2321)))
+  (is (= (occupied-seats (stable-plan (read-input "input-day11")
+                                      step-plan))
+         2321))
+
+  (is (= 26 (occupied-seats (stable-plan (str/split-lines
+                                           "L.LL.LL.LL\nLLLLLLL.LL\nL.L.L..L..\nLLLL.LL.LL\nL.LL.LL.LL\nL.LLLLL.LL\n..L.L.....\nLLLLLLLLLL\nL.LLLLLL.L\nL.LLLLL.LL")
+                                         step-plan2))))
+
+  (is (= 2102 (occupied-seats (stable-plan (read-input "input-day11")
+                                           step-plan2))))
+  )

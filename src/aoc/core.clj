@@ -445,7 +445,8 @@
 
 (def plan (str/split-lines "L.LL.LL.LL\nLLLLLLL.LL\nL.L.L..L..\nLLLL.LL.LL\nL.LL.LL.LL\nL.LLLLL.LL\n..L.L.....\nLLLLLLLLLL\nL.LLLLLL.L\nL.LLLLL.LL"))
 
-(defn neighbours [[x y]]
+(defn neighbours
+  [[x y]]
   (for [dx [-1 0 1] dy (if (zero? dx) [-1 1] [-1 0 1])]
     [(+ dx x) (+ dy y)]))
 
@@ -461,16 +462,77 @@
 
           :else seat-status)))
 
-(defn step-plan [plan]
-  (let [row-l (count (first plan))]
+(defn step-plan [cell-stepper plan]
+  (let [cols (count (first plan))]
     (mapv str/join
-          (partition row-l
+          (partition cols
                      (str/join (for [row (range (count plan))
-                                     col (range row-l)]
-                                 (step-cell [row col] plan)))))))
+                                     col (range cols)]
+                                 (cell-stepper [row col] plan)))))))
 
-(defn stable-plan [plan]
-  (first (first (drop-while #(apply not= %) (partition 2 1 (iterate step-plan plan))))))
+(defn stable-plan [plan stepper]
+  (let [steps  (iterate stepper plan)
+        stable (first (drop-while #(apply not= %) (partition 2 1 steps)))]
+    (first stable)))
 
-(defn seat-count [plan]
-  (get (frequencies (str/join (stable-plan plan))) \#))
+(defn visible-seats [plan cell]
+  (let [dim            [(count plan) (count (first plan))]
+        [row-max col-max] dim
+
+        dirs           (for [dx [-1 0 1] dy (if (zero? dx) [-1 1] [-1 0 1])]
+                         [dx dy])
+
+        move           (fn [[row col] [dx dy]]
+                         [(+ dx row) (+ dy col)])
+
+        on-board       (fn [[row col]]
+                         (and (<= 0 row (dec row-max))
+                              (<= 0 col (dec col-max))))
+
+        neighbours     (map
+                         (fn [dir]
+                           (take-while on-board
+                                       (rest
+                                         (iterate (fn [cell]
+                                                    (move cell dir))
+                                                  cell))))
+                         dirs)
+
+        is-seat        (fn [c] (contains? #{\# \L} c))
+
+        visible-seats  (map (fn [steps] (first
+                                          (filter is-seat
+                                                  (map #(get-in plan %) steps))))
+                            neighbours)
+
+        occupied-seats (count (filter (fn [s] (= \# s))
+                                      visible-seats))]
+    occupied-seats))
+
+(defn step-cell2 [cell plan]
+  (let [seat-status (get-in plan cell)]
+    (if (= \. seat-status)
+      \.
+      (let [visible (visible-seats plan cell)]
+
+        (cond (and (= \# seat-status)
+                   (<= 5 visible)) \L
+
+              (and (= \L seat-status)
+                   (= 0 visible)) \#
+
+              :else seat-status)))))
+
+(defn occupied-seats [plan]
+  (get
+    (frequencies (str/join plan))
+    \#))
+
+;; answer part 2 - 2102
+(defn day11 []
+  (println "part1" (occupied-seats (stable-plan (read-input "input-day11")
+                                                (partial step-plan step-cell))))
+
+  (println "part2" (occupied-seats (stable-plan (read-input "input-day11")
+                                                (partial step-plan step-cell2)))))
+
