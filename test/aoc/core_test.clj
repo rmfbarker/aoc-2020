@@ -1,6 +1,7 @@
 (ns aoc.core-test
   (:require [clojure.test :refer :all]
             [aoc.core :refer :all]
+            [aoc.day12 :as day12]
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
@@ -190,4 +191,23 @@
 
   (is (= 2102 (occupied-seats (stable-plan (read-input "input-day11")
                                            step-plan2))))
+  )
+
+(deftest day12
+
+  (is (= {:orientation :east :x 10 :y 0}
+         (day12/move {:orientation :east :x 0 :y 0}
+                     "F10")))
+
+  (is (= {:orientation :east :x 0 :y 10}
+         (day12/move {:orientation :east :x 0 :y 0}
+                     "N10")))
+
+  (is (= {:orientation :north :x 0 :y 0}
+         (day12/move {:orientation :east :x 0 :y 0}
+                     "L90")))
+
+  (is (= {:orientation :south :x 0 :y 0}
+         (day12/move {:orientation :east :x 0 :y 0}
+                     "R90")))
   )
