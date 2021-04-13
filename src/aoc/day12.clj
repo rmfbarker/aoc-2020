@@ -6,10 +6,17 @@
 
 (defn move-ship [{:keys [x y] :as ship} dir steps]
   (condp = dir
-    :north (assoc ship :y (+ y steps))
-    :east (assoc ship :x (+ x steps))
-    :south (assoc ship :y (- y steps))
-    :west (assoc ship :x (- x steps))))
+    :north (update ship :y + steps)
+    :east (update ship :x + steps)
+    :south (update ship :y - steps)
+    :west (update ship :x - steps)))
+
+(defn move-waypoint [ship dir steps]
+  (condp = dir
+    :north (update-in ship [:waypoint :y] + steps)
+    :east (update-in ship [:waypoint :x] + steps)
+    :south (update-in ship [:waypoint :y] - steps)
+    :west (update-in ship [:waypoint :x] - steps)))
 
 (defn move-forward [{:keys [orientation] :as ship} steps]
   (move-ship ship orientation steps))
@@ -37,6 +44,7 @@
   (let [[dir steps] (parse-cmd cmd)]
     (condp = dir
       "F" (move-forward ship steps)
+
       "N" (move-ship ship :north steps)
       "E" (move-ship ship :east steps)
       "S" (move-ship ship :south steps)
@@ -44,6 +52,23 @@
 
       "L" (rotate ship cmd)
       "R" (rotate ship cmd))))
+
+(defn move-part2 [ship cmd]
+  (let [[dir steps] (parse-cmd cmd)]
+    (condp = dir
+      "F" (move-forward ship steps)
+
+      "N" (move-ship ship :north steps)
+      "E" (move-ship ship :east steps)
+      "S" (move-ship ship :south steps)
+      "W" (move-ship ship :west steps)
+
+      "L" (rotate ship cmd)
+      "R" (rotate ship cmd))))
+
+(defn move-waypoint [waypoint cmd]
+
+)
 
 (defn manhattan-dist [ship]
   (let [{:keys [x y]} ship]
@@ -54,5 +79,6 @@
     (reduce
       move
       (make-ship)
-      (read-input "input-day12")))                          ;; => 998
+      (read-input
+       "input-day12")))                          ;; => 998
   )
